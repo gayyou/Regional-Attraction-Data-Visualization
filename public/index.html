@@ -1,17 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cn">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title>icmk</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD5c5bdQjZ5TmggVpcn_z9hHQZjYyXjCU&language=en">
+    </script>
+    <title>顶天立地</title>
   </head>
   <body>
     <noscript>
       <strong>We're sorry but icmk doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <div id="app"></div>
+    <!-- <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('google-map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 8
+        });
+      }
+    </script> -->
+    
     <!-- built files will be auto injected -->
   </body>
 </html>
