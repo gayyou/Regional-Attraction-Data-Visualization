@@ -8,7 +8,22 @@ Vue.use(Vuex)
  */
 export default new Vuex.Store({
   state: {
-
+    // 下面是左边侧栏的显示与否控制
+    panel: {
+      leftFirActive: false,
+      leftSecActive: false,
+      secPanMode: 0   // 0是区域热度模式，1是出租车流动模式，2是查看区别模式
+    },
+    // 下面是排行榜的单位控制
+    rankSample: {
+      rankUnit: 0
+    },
+    // 以下是地图存储
+    mapList: [
+      {
+        id: 'map1'
+      }
+    ]
   },
   mutations: {
 

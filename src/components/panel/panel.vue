@@ -3,8 +3,11 @@
 </template>
 
 <script>
+import leftSecPanel from './leftSecPanel/leftSecPanel.vue'
 export default {
-  
+  components: {
+    leftSecPanel
+  }
 }
 </script>
 

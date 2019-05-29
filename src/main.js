@@ -5,20 +5,21 @@ import store from './store'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import axios from 'axios';
+import locale from 'element-ui/lib/locale/lang/en'
+
+Vue.use(ElementUI, { locale })
 
 Vue.use(ElementUI);
-
-console.log(process.env.NODE_ENV)
 
 axios.defaults.timeout = 5000;
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 
 if (process.env.NODE_ENV === 'development') {
   // 测试环境
-  axios.defaults.baseURL = 'http://www.benhefoodstuff.com:24567';
+  axios.defaults.baseURL = 'http://39.98.41.126:11290';
 } else {
   // 生产环境
-  axios.defaults.baseURL = 'http://www.benhefoodstuff.com:24567';
+  axios.defaults.baseURL = 'http://39.98.41.126:11290';
 }
 
 Vue.prototype.$http = axios;

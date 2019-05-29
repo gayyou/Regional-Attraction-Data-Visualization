@@ -1,11 +1,17 @@
 <template>
   <div id="app">
-    <router-view/>
+    <!-- <router-view/> -->
+    <index></index>
   </div>
 </template>
 
 <script>
+import index from './views/index.vue';
+
 export default {
+  components: {
+    index
+  },
   mounted() {
 
   }
@@ -14,6 +20,10 @@ export default {
 
 
 <style>
+@font-face {
+  font-family: 'SourceHanSansCN-Regular';
+  src: url('assets/fonts/SourceHanSansCN-Regular.ttf') format('truetype');
+}
 /*
 初始化css
 */
@@ -57,7 +67,7 @@ button {
 }
 
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'SourceHanSansCN-Regular', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

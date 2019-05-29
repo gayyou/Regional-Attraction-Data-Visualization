@@ -5,25 +5,28 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD5c5bdQjZ5TmggVpcn_z9hHQZjYyXjCU&language=en">
+    <script src="http://ditu.google.cn/maps/api/js?&key=AIzaSyBD5c5bdQjZ5TmggVpcn_z9hHQZjYyXjCU&language=en"></script>
+    <script src="./d3.min.js"></script>
+    <script>
+      function resizeRem() {
+          var whdef = 100 / 1920;
+          // 根据设计稿的宽高和屏幕的宽度定义Rem的值
+          var wH = window.screen.availHeight;
+          var wW = window.screen.availWidth;
+          var rem = wW * whdef;
+          // window.rem = rem;
+          document.documentElement.style.fontSize = rem + 'px';
+        }
+        // window.onresize = resizeRem;
+        resizeRem();
     </script>
-    <title>顶天立地</title>
+    <title>Of indomitable spirit</title>
   </head>
   <body>
     <noscript>
       <strong>We're sorry but icmk doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app"></div>
-    <!-- <script>
-      var map;
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('google-map'), {
-          center: {lat: -34.397, lng: 150.644},
-          zoom: 8
-        });
-      }
-    </script> -->
-    
+    <div id="app"></div> 
     <!-- built files will be auto injected -->
   </body>
 </html>

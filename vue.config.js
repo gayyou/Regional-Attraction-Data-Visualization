@@ -10,11 +10,7 @@ module.exports = {
         Popper: ['popper.js', 'default']
       }),
     ],
-    externals: {
-      'google': 'google'
-    },
   },
   publicPath: './',
-  lintOnSave: false,
-  
+  lintOnSave: false
 }
