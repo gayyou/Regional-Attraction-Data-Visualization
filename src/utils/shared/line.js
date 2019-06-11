@@ -1,78 +1,87 @@
-import { pathUtil } from './staticObjctUtils'
-import { getGeoJSON } from './model'
-
 /**
- * @description 得到飞线的path路径
- * @param { item: Object } item 路径，包括权值以及两点间的经纬度
+ * @description 属性向model.ts里面寻找
+ * @param {class option} FlyLineOption 
  */
-export function getFlyLine(item) {
-  console.log(getGeoJSON(item))
-  return pathUtil()(getGeoJSON(item));
-}
-
-// export function renderPath(item, target) {
-//   let d3 = window.d3,
-//     svg = d3.select(target)//定位页面位置
-//         .append('svg')//添加画布
-//         .attr('width', '100vw')//添加宽度
-//         .attr('height', '100vh');
-//   let path = getFlyLine(item);
-
-//   console.log(svg.append('path')
-//     .attr('d', path)
-//     .attr('stroke', 'blue')
-//     .attr('stroke-width', 2)
-//     .attr('fill', 'none'));
-
-//   return svg;
-// }
-
-export function createOverlayHandle (item, that) { // 创建自定义叠加层
-  const _self = that;
-  let d3 = window.d3;
-
-  USGSOverlay.prototype = new window.google.maps.OverlayView() // 继承overlayView
-  function USGSOverlay () { // 存放需要放的属性
-    this.setMap(_self.map);
-    this.layer = null;
-  }
-  USGSOverlay.prototype.onAdd = function () { // 添加的方法：控制渲染成自定义的模板
-    let panes = this.getPanes()
-    console.log(panes)
-    this.layer = d3.select(panes.overlayLayer);
-    this.layer.append('svg').attr('width', '100vw')//添加宽度
-              .attr('height', '100vh').append('path')
-    // this.layer.append('svg')
-    //           // .attr('class', 'stations')
-    //           // .attr('width', '100vw')//添加宽度
-    //           // .attr('height', '100vh')
-    //           .append('path')
-    //           .attr('d', getFlyLine(item))
-    //           .attr('stroke', 'blue')
-    //           .attr('stroke-width', 2)
-    //           .attr('fill', 'none');
-  }
-  USGSOverlay.prototype.draw = function () { 
-    let projection = this.getProjection();
-    let d1 = new window.google.maps.LatLng(item.cor[0][1], item.cor[0][0]);
-    console.log('d1', d1.lng());
-    d1 = projection.fromLatLngToDivPixel(d1);
-    let d2 = new window.google.maps.LatLng(item.cor[1][1], item.cor[1][0]);
-    d2 = projection.fromLatLngToDivPixel(d2);
-    item.cor[0] = [d1.x, d1.y];
-    item.cor[1] = [d2.x, d2.y];
-    console.log(item)
-    this.layer.select('path')
-              .attr('d', getFlyLine(item))
-              .attr('stroke', 'blue')
-              .attr('stroke-width', 2)
-              .attr('fill', 'none');
-  }
-  USGSOverlay.prototype.onRemove = function () { // 方法：删除
-    
-  }
-  let overlay = new USGSOverlay() // 创建实例化对象
-  console.log(overlay)
-  // overlay.draw();
-  // overlay.onAdd();
+export function getFlyLine(FlyLineOption) {
+  return [
+    // {
+    //   name: FlyLineOption.name,
+    //   coordinateSystem: "amap",
+    //   type: "lines",
+    //   zlevel: 1,
+    //   effect: {
+    //     show: true,
+    //     period: 6,
+    //     trailLength: 0.7,
+    //     color: "#fff",
+    //     symbolSize: 3
+    //   },
+    //   lineStyle: {
+    //     normal: {
+    //       color: FlyLineOption.lineColor,
+    //       width: 0,
+    //       curveness: 0.2
+    //     }
+    //   },
+    //   data: [
+    //     {
+    //       fromName: FlyLineOption.fromName,
+    //       toName: FlyLineOption.toName,
+    //       coords: [FlyLineOption.fromLngLat, FlyLineOption.toLngLat],
+    //       value: FlyLineOption.value
+    //     }
+    //   ]
+    // },
+    {
+      name: FlyLineOption.name,
+      coordinateSystem: "amap",
+      type: "lines",
+      zlevel: 2,
+      symbol: ["none", "arrow"],
+      symbolSize: 10,
+      lineStyle: {
+        normal: {
+          color: FlyLineOption.lineColor,
+          width: 1,
+          opacity: 0.6,
+          curveness: 0.2
+        }
+      },
+      data: [
+        {
+          fromName: FlyLineOption.fromName,
+          toName: FlyLineOption.toName,
+          coords: [FlyLineOption.fromLngLat, FlyLineOption.toLngLat],
+          value: FlyLineOption.value
+        }
+      ]
+    },
+    // {
+    //   name: FlyLineOption.name,
+    //   type: "effectScatter",
+    //   coordinateSystem: "amap",
+    //   zlevel: 2,
+    //   rippleEffect: {
+    //     brushType: "stroke"
+    //   },
+    //   label: {
+    //     normal: {
+    //       show: true,
+    //       position: "bottom",
+    //       formatter: "{b}"
+    //     }
+    //   },
+    //   itemStyle: {
+    //     normal: {
+    //       color: FlyLineOption.symbolColor
+    //     }
+    //   },
+    //   data: [
+    //     {
+    //       name: FlyLineOption.toName,
+    //       value: [...FlyLineOption.toLngLat, FlyLineOption.value]
+    //     }
+    //   ]
+    // }
+  ]
 }

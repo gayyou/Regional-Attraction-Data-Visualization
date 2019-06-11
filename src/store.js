@@ -14,16 +14,45 @@ export default new Vuex.Store({
       leftSecActive: false,
       secPanMode: 0   // 0是区域热度模式，1是出租车流动模式，2是查看区别模式
     },
+    isContract: false,
     // 下面是排行榜的单位控制
     rankSample: {
-      rankUnit: 0
+      map1: {
+        rankUnit: 0
+      },
+      map2: {
+        rankUnit: 0
+      },
+    },
+    echarts: {
+      map1: {
+        mycharts: null,
+        layer: null
+      },
+      map2: {
+        mycharts: null,
+        layer: null
+      }
     },
     // 以下是地图存储
     mapList: [
       {
         id: 'map1'
       }
-    ]
+    ],
+    maps: {
+      map1: null,
+      map2: null
+    },
+    flightPath: {
+      map1: null,
+      map2: null
+    },
+    tips: [],
+    mouse: {
+      x: 0,
+      y: 0
+    }
   },
   mutations: {
 

@@ -9,8 +9,11 @@
   },
   "dependencies": {
     "core-js": "^2.6.5",
+    "echarts": "^4.2.1",
+    "echarts-amap": "^1.0.0-rc.6",
     "google": "^2.1.0",
     "jquery": "^3.4.1",
+    "pubsub-js": "^1.7.0",
     "sass-loader": "^7.1.0",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3",

@@ -14,6 +14,7 @@
 <script>
 import { colorModel } from '../../../utils/shared/model.js'
 export default {
+  props: ['rankUnit'],
   data() {
     return {
       sampleList: [
@@ -21,20 +22,24 @@ export default {
       ]
     }
   },
+  mounted() {
+    console.log(this.rankUnit)
+  },
   watch: {
-    '$store.state.rankSample.rankUnit'(newVal) {
+    'rankUnit'(newVal) {
+      console.log(newVal)
       this.$data.sampleList = [];
       let num = 1;
       for (let item of colorModel) {
         this.$data.sampleList.push({
-          value: newVal * (num - 1) + '-' + (newVal * num - 1),
+          value: (newVal * (num - 1)).toFixed(1) + '-' + (newVal * num).toFixed(1),
           color: item
         });
         num++;
       }
-      let last = this.$data.sampleList.pop();
-      last.value = (newVal * (num - 2)) + '以上';
-      this.$data.sampleList.push(last);
+      // let last = this.$data.sampleList.pop();
+      // last.value = (newVal * (num - 2)) + '以上';
+      // this.$data.sampleList.push(last);
     }
   }
 }

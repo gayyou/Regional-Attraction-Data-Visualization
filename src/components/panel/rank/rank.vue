@@ -1,6 +1,8 @@
 <template>
-  <div class="rank">
-    <div class="switch-button">
+  <div class="rank" :class="isOpen ? 'rank-active' : ''">
+    <div class="switch-button" @click="switchRank"
+      
+    >
       <span>Rank</span>
       <img 
         :src="isOpen ? require('../../../assets/icons/arrow_right_large.png') : require('../../../assets/icons/arrow_left_large.png')" alt="">
@@ -31,6 +33,11 @@ export default {
         'BAIYUNQU'
       ]
     }
+  },
+  methods: {
+    switchRank() {
+      this.$data.isOpen = !this.$data.isOpen
+    }
   }
 }
 </script>
@@ -43,8 +50,10 @@ $fontColor: #0060e6;
   background-color: rgba($color: #373f53, $alpha: .9);
   border-bottom-left-radius: 4px;
   padding-bottom: 0.34rem;
+  transition: all .5s ease;
 
   .switch-button {
+    cursor: pointer;
     position: absolute;
     display: flex;
     justify-content: center;
@@ -128,5 +137,8 @@ $fontColor: #0060e6;
   content: "";
   display: block;
   clear: both;
+}
+.rank-active {
+  right: -3.6rem!important;
 }
 </style>
