@@ -13,8 +13,20 @@
 </template>
 
 <script>
+import PubSub from 'pubsub-js'
 export default {
-  props: ['name', 'value']
+  props: ['name', 'value'],
+  mounted() {
+    PubSub.subscribe('getFlowData' , (event, data) => {
+      let id = data.id;
+      this.$http
+        .get('/flyIntoSky/queryflow?id=' + id)
+        .then(res => {
+          let resData = res.data;
+          console.log(resData)
+        })
+    });
+  }
 }
 </script>
 
