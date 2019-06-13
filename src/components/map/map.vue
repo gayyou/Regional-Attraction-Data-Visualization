@@ -33,8 +33,8 @@ export default {
   },
   props: ['id', 'heatData', 'isOpenHeat'],
   mounted() {
-    // this.$store.state.showMessage = true;
-    //           this.$store.state.message = '请求超时，请检查您的网络是否正常'
+    // this.$store.state.showCharts = true;
+              // this.$store.state.message = '请求超时，请检查您的网络是否正常'
     
     // this.mychart = this.$echarts.init($('#' + this.id)[0]);
     // this.mychart.setOption({
@@ -78,164 +78,6 @@ export default {
       scaleControl: false
     });
     this.$data.map = this.map;
-
-    // this.$nextTick(() => {
-    //   this.$store.state.echarts[this.id].mychart = this.mychart;
-    //   this.$store.state.echarts[this.id].layer = this.layer;
-    // })
-    
-    // this.$data.map = this.mychart
-    //   .getModel()
-    //   .getComponent('amap')
-    //   .getAMap();
-    // this.layer = this.mychart
-    //   .getModel()
-    //   .getComponent('amap')
-    //   .getLayer();
-    // let series = [];
-    // for (let i = 0; i < 300; i++) {
-    //   series = [...series, ...getFlyLine({
-    //     name: '测试',
-    //     value: 96,
-    //     lineColor: '#954654',
-    //     symbolColor: '#954654',
-    //     fromName: '#954654',
-    //     toName: '#954654',
-    //     fromLngLat: data[i].start,
-    //     toLngLat: data[i].end
-    //   })];
-    // }
-    // console.log(series)
-    // this.mychart.setOption({
-    //   series: series
-    // });
-    // //下面是确保高德地图渲染的时候，echarts同时也需要再次渲染一次，保持位置的同步
-    // this.layer.render = () => {
-    //   this.mychart.setOption({
-    //     series: series
-    //   });
-    // };
-    // window.data = data;
-    // let arrs = []
-    // let rankUnit = this.dealRankDis(data);
-    // for (let i = 0; i < data.length; i++) {
-    //   let temp = this.getPolygon(data[i], rankUnit)
-    //   arrs.push(temp);
-    // }
-    
-
-//     var coord1 = new google.maps.LatLng(25.165876, 123.3); 
- 
-//     var coord2 = new google.maps.LatLng(25.786328, 123.0); 
- 
-//     var coord3 = new google.maps.LatLng(27, 123.15); 
-
-//     var bounds = new google.maps.LatLngBounds(); 
-//     console.log(google.maps.LatLngBounds.toString())
- 
-//     bounds.extend(coord1); 
- 
-//     bounds.extend(coord2); 
-
-//     bounds.extend(coord3); 
- 
-//     this.map.fitBounds(bounds); 
- 
-
-//   // console.log(coord1)
-//     let pLineOpt = { 
- 
-//      path: [coord1, coord3], 
- 
-//      geodesic: true, 
- 
-//      strokeColor: '#000', 
- 
-//      strokeOpacity: 1.0, 
- 
-//      strokeWeight: 1
- 
-//     } 
-
-
-//     let pLine = new google.maps.Polyline(pLineOpt); 
-        
-// pLine.setMap(this.map); 
-//     pLineOpt = { 
- 
-//      path: [coord3, coord2], 
- 
-//      geodesic: true, 
- 
-//      strokeColor: '#000', 
- 
-//      strokeOpacity: 1.0, 
- 
-//      strokeWeight: 1
- 
-//     } 
-
-//     pLine = new google.maps.Polyline(pLineOpt); 
-
-//     pLine.setMap(this.map); 
-
-    
-
-    // var p1 = new google.maps.LatLng(23.634501, -102.552783);
-    // var p2 = new google.maps.LatLng(17.987557, -92.929147);
-
-    // var markerP1 = new google.maps.Marker({
-    //     position: p1,
-    //     map: this.map
-    // });
-    // var markerP2 = new google.maps.Marker({
-    //     position: p2,
-    //     map: this.map
-    // });
-    // google.maps.event.addListener(this.map, 'projection_changed', () => {
-    //     var p1 = this.map.getProjection().fromLatLngToPoint(markerP1.getPosition());
-    //     var p2 = this.map.getProjection().fromLatLngToPoint(markerP2.getPosition());
-    //     var e = new google.maps.Point(p1.x - p2.x, p1.y - p2.y);
-    //     var m = new google.maps.Point(e.x / 2, e.y / 2);
-    //     var o = new google.maps.Point(0, 7);
-    //     var c = new google.maps.Point(m.x + o.x, m.y + o.y);
-    //     var curveMarker2 = new google.maps.Marker({
-    //         position: markerP1.getPosition(),
-    //         icon: {
-    //             path: 'M 0 0 q ' + c.x + ' ' + c.y + ' ' + e.x + ' ' + e.y,
-    //             scale: 8,
-    //             strokeWeight: 2,
-    //             fillColor: '#009933',
-    //             fillOpacity: 0,
-    //             rotation: 180,
-    //             anchor: new google.maps.Point(0, 0)
-    //         }
-    //     });
-    //     curveMarker2.setMap(this.map);
-    //     google.maps.event.addListener(this.map, 'zoom_changed', () => {
-    //         var p1 = this.map.getProjection().fromLatLngToPoint(markerP1.getPosition());
-    //     var p2 = this.map.getProjection().fromLatLngToPoint(markerP2.getPosition());
-    //     var e = new google.maps.Point(p1.x - p2.x, p1.y - p2.y);
-    //     var m = new google.maps.Point(e.x / 2, e.y / 2);
-    //     var o = new google.maps.Point(0, 7);
-    //     var c = new google.maps.Point(m.x + o.x, m.y + o.y);
-    //     var curveMarker2 = new google.maps.Marker({
-    //         position: markerP1.getPosition(),
-    //         icon: {
-    //             path: 'M 0 0 q ' + c.x + ' ' + c.y + ' ' + e.x + ' ' + e.y,
-    //             scale: 8,
-    //             strokeWeight: 2,
-    //             fillColor: '#009933',
-    //             fillOpacity: 0,
-    //             rotation: 180,
-    //             anchor: new google.maps.Point(0, 0)
-    //         }
-    //     });
-    //     curveMarker2.setMap(this.map);
-    //     });
-    // });
-
-    console.log(d3.range(2, 2 + 2))
     
 
     PubSub.subscribe('renewPoly' , (event, data) => {
@@ -440,6 +282,26 @@ export default {
                                     'value:' + flightPath.value].join('<br>'));
         this.coordInfoWindow.setPosition(new google.maps.LatLng(lat, lng));
         this.coordInfoWindow.open(this.map);
+        this.$store.state.showConfirm = true;
+        this.$store.state.confirmMes = 'Are you sure to display a two-month flow lines chart for the selected area?'
+        let token = PubSub.subscribe('confirmChart', (event, data) => {
+          PubSub.unsubscribe(token);
+          if (data.confirm) {
+            let id = flightPath.id;
+            this.$http
+              .get('/flyIntoSky/queryflow?id=' + id)
+              .then((res) => {
+                let data = res.data;
+                this.$store.state.showCharts = true;
+                this.$nextTick(() => {
+                  PubSub.publish('getDataCharts', data)
+                })
+                
+              })
+            
+          }
+        })
+        
       })
       // flightPath.on('click', (event) => {
       //   console.log(event)

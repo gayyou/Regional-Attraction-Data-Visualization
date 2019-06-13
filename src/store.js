@@ -8,6 +8,11 @@ Vue.use(Vuex)
  */
 export default new Vuex.Store({
   state: {
+    showMessage: false,
+    message: '',
+    confirmMes: '',
+    showConfirm: false,
+    showCharts: false,
     // 下面是左边侧栏的显示与否控制
     panel: {
       leftFirActive: false,

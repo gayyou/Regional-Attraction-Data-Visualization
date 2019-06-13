@@ -4,15 +4,17 @@
       <span>message</span>
     </div>
     <div class="prompt-value">
-      <span>{{ $store.state.message }}</span>
+      <span>{{ $store.state.confirmMes }}</span>
     </div>
     <div class="prompt-choice">
-      <button class="prompt-confirm" @click="isRead">confirm</button>
+      <button class="prompt-cancel" @click="cancelOperate">cancle</button>
+      <button class="prompt-confirm" @click="confirmOperate">comfirm</button>
     </div>
   </div>
 </template>
 
 <script>
+import PubSub from 'pubsub-js'
 export default {
   data() {
     return {
@@ -25,8 +27,21 @@ export default {
     }, 10);
   },
   methods: {
-    isRead(event) {
-      this.$store.state.showMessage = false;
+    cancelOperate() {
+      this.$store.state.showConfirm = false;
+      this.$data.isAnimate = false;
+      PubSub.publish('confirmChart', {
+        confirm: false,
+        cancel: true
+      })
+    },
+    confirmOperate() {
+      this.$store.state.showConfirm = false;
+      this.$data.isAnimate = false;
+      PubSub.publish('confirmChart', {
+        confirm: true,
+        cancel: false
+      })
     }
   },
 }
@@ -66,6 +81,7 @@ $themeColor: #0060e6;
 
     >span {
       display: block;
+      font-family: 'HYZhuZiMuTouRen';
       font-size: 34px;
       color: $themeColor;
       letter-spacing: 0.04rem;

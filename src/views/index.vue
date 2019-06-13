@@ -20,18 +20,21 @@
     >
       <img src="../assets/icons/arrow_left_large.png" alt="">
     </div>
+    <layer></layer>
   </div>
 </template>
 
 <script>
+import layer from '../components/layer/layer.vue'
 import AMap from '../components/map/map.vue'
 import leftFirstPanel from '../components/panel/leftFirPanel/leftFirPanel.vue';
 import leftSecPanel from '../components/panel/leftSecPanel/leftSecPanel.vue';
-import mapTip from '../components/layer/mapTip/mapTip.vue';
+// import mapTip from '../components/layer/mapTip/mapTip.vue';
 
 export default {
   components: {
-    mapTip,
+    layer,
+    // mapTip,
     AMap,
     leftFirstPanel,
     leftSecPanel
