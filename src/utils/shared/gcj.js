@@ -154,7 +154,9 @@ export function getGCJ(data) {
 
   for(let i = 0; i < data.length; i++) {
     let item = {
-      value: data[i].value
+      value: data[i].value,
+      msg: data[i].msg,
+      id: data[i].id
     }
     let newArr = [];
     for(let j = 0; j < data[i].lnglat.length; j++) {

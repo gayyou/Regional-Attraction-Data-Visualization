@@ -11,6 +11,8 @@ export default new Vuex.Store({
     showMessage: false,
     message: '',
     confirmMes: '',
+    rightTipMes: '',
+    showRightTip: false,
     showConfirm: false,
     showCharts: false,
     // 下面是左边侧栏的显示与否控制
@@ -23,7 +25,8 @@ export default new Vuex.Store({
     // 下面是排行榜的单位控制
     rankSample: {
       map1: {
-        rankUnit: 0
+        rankUnit: 0,
+        flyRankUnit: 0
       },
       map2: {
         rankUnit: 0

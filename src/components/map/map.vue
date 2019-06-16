@@ -1,9 +1,19 @@
 <template>
   <div class='map-container'>
     <div :id='id' class='google-map'></div>
-    <rank class='rank' ></rank>
-    <valueSample class='rank-sample' :rankUnit='$data.rankUnit'
+    <rank class='rank' 
+      :ranks="this.$data.rank"
+    ></rank>
+    <valueSample class='rank-sample' 
+      :rankUnit='$data.rankUnit'
+      :rankTitle='"AttractRank"'
       v-if='$store.state.rankSample[this.id].rankUnit != 0'
+    ></valueSample>
+    <valueSample class='rank-sample' 
+      :rankUnit='$data.flylineRankUnit'
+      :rankTitle='"Flyline rank"'
+      style="bottom: 0rem;"
+      v-if="$store.state.rankSample['map1'].flyRankUnit != 0"
     ></valueSample>
   </div>
 </template>
@@ -23,16 +33,20 @@ export default {
   },
   data() {
     return {
+      rank: [],
+      flylineRankUnit: 0,
       example: {
         type: 'LineString',
         cor: [[91.1865, 30.1465], [116.4551, 40.2539]]
       },
       map: null,
-      rankUnit: 0
+      rankUnit: 0,
+      mousedown: false
     };
   },
   props: ['id', 'heatData', 'isOpenHeat'],
   mounted() {
+    
     // this.$store.state.showCharts = true;
               // this.$store.state.message = '请求超时，请检查您的网络是否正常'
     
@@ -78,26 +92,43 @@ export default {
       scaleControl: false
     });
     this.$data.map = this.map;
-    
+    this.map.addListener("mousedown", () => { 
+      this.$data.mousedown = true
+    }); 
+    this.map.addListener("mouseup", () => { 
+      this.$data.mousedown = false
+    }); 
 
     PubSub.subscribe('renewPoly' , (event, data) => {
       if (data.id != this.id && data.id) {
         return ;
       }
-
+      this.$store.state.showRightTip = true;
+      this.$store.state.rightTipMes = 'You can click on the color area to see the PageRank value.'
       let arr = data.data;
 
       let rankUnit = this.dealRankDis(arr);
-    
-      data = getGCJ(data);
+
+      arr = getGCJ(arr);
+
+      console.log(arr.length)
+      // this.insertSort(data);
+      // console.log(data)
+
+      this.$data.rank = [];
+      let length = arr.length
+      console.log(arr)
+      
+      this.$data.rank.push(arr[length - 1].msg)
+      this.$data.rank.push(arr[length - 2].msg)
+      this.$data.rank.push(arr[length - 3].msg)
+
 
       let flightPathArr = []
       for (let i = 0; i < arr.length; i++) {
         let temp = this.getPolygon(arr[i], rankUnit)
         temp.setMap(this.$data.map)
-        // this.$data.map.add(temp)
         flightPathArr.push(temp);
-        // temp.setMap(this.map);
       }
       this.$store.state.flightPath[this.id] = flightPathArr;
       this.$store.state.maps[this.id] = this.$data.map;
@@ -107,6 +138,7 @@ export default {
         this.$data.rankUnit = rankUnit;
       })
     });
+
     PubSub.subscribe('renewFlyline' , (event, data) => {
       if (data.id != this.id && data.id) {
         return ;
@@ -114,12 +146,24 @@ export default {
 
       let flylineSeries = [],
           lineData = data.data,
-          rankUnit = this.dealRankDis(lineData);
+          rankUnit = this.dealRankDis(lineData),
+          isContract = false;
+      
+      this.$store.state.rankSample['map1'].flyRankUnit = rankUnit;
+      this.$nextTick(() => {
+        this.$data.flylineRankUnit = rankUnit;
+      })
+
       let max = this.getMaxValue(lineData);
-      var overlay = new google.maps.OverlayView();
-      data = lineData
+      let overlay = new google.maps.OverlayView();
+      // insertSort(lineData)
+      data = lineData;
+      let lens = Math.floor(data.length * 0.3);
+      data = data.slice(lens)
+
     const that = this;
     overlay.onAdd = function() {
+      // console.log(this.getPanes().overlayLayer)
         var layer = d3.select(this.getPanes().overlayLayer).append('svg')
             .attr('class', 'fly-layer');
 
@@ -133,37 +177,58 @@ export default {
           .attr('orient', 'auto')
           .append('path')
           .attr('d', 'M2,2 L2,11 L10,6 L2,2')
-          .attr('fill', '#00ff00');
+          .attr('fill', '#FF0000');
 
-        console.log('data', data)
+        // console.log('data', data)
 
         layer.selectAll('.flyLine').data(data, (d) => d.id).enter().append('path').attr('class', 'flyLines')
         var projection = this.getProjection();
         overlay.draw = function() {
-          console.log(layer)
-          
+          if (that.$data.mousedown) {
+            return ;
+          }
+          let isContract = false;
+          let randomBash = 0;
           let bounds = this.map.getBounds();
           let nw = bounds.getNorthEast(),
               sw = bounds.getSouthWest(),
               center = bounds.getCenter();
           
-
           layer.selectAll('.flyLines')
             .data(data)
             .each(transform)
 
-          function getCosFromTan(value, len) {
-            let rad = Math.atan(value);
-            let length = len;
+          function getCosFromTan(d1, d2, isContract) {
+            let value, rad;
+            if (d2.x == d1.x) {
+              value = 0;
+              rad = Math.PI / 2;
+            } else {
+              value = (d2.y - d1.y) / (d2.x - d1.x),
+              rad = Math.atan(Math.abs(value));
+            }
+            
+            let length = Math.pow(Math.pow(d2.y - d1.y, 2) + Math.pow(d2.x - d1.x, 2), 1 / 2),
+                paramX, paramY;
 
-            return {
-              x: length * Math.cos(rad),
-              y: length * Math.sin(rad)
-            };
+            if (value < 0) {
+              paramX = 1;
+              paramY = 1;
+            } else {
+              paramX = 1;
+              paramY = -1;
+            }
+
+            return isContract ? {
+              x: paramX * length * Math.sin(rad),
+              y: paramY * length * Math.cos(rad)
+            } : {
+              x: -(paramX * length * Math.sin(rad)),
+              y: -(paramY * length * Math.cos(rad))
+            }
           }
 
           function transform(flyObj) {
-            console.log(flyObj)
             let d = new google.maps.LatLng(flyObj.fromLnglat[1], flyObj.fromLnglat[0]);
             let d2 = new google.maps.LatLng(flyObj.toLnglat[1], flyObj.toLnglat[0]);
             let bash = new google.maps.LatLng(nw.lat(), nw.lng())
@@ -171,23 +236,27 @@ export default {
             d = projection.fromLatLngToDivPixel(d);
             d2 = projection.fromLatLngToDivPixel(d2);
             let bashX = projection.fromLatLngToDivPixel(bash).x;
-            let bashY = projection.fromLatLngToDivPixel(bash2).y;
-            let value = (d2.y - d.y) / (d2.x - d.x);
-            let len = Math.pow(Math.pow(d2.y - d.y, 2) + Math.pow(d2.x - d.x, 2), 1 / 2);
-            let res = getCosFromTan(value, len);
-            res.x = bashX + (d2.x + d.x) / 2;
-            res.y = bashY - 40 + (d2.y + d.y) / 2;
+            let bashY = projection.fromLatLngToDivPixel(bash2).y
+            let res = getCosFromTan(d, d2, isContract);
+
+            if (isContract == true) {
+              isContract = false;
+            } else {
+              isContract = true;
+            }
+            randomBash =  (randomBash + 1) % 10;
+            res.x = bashX + res.x * (randomBash / 10) + (d2.x + d.x) / 2;
+            res.y = bashY + res.y * (randomBash / 10) + (d2.y + d.y) / 2;
+            let color = that.getValeColor(flyObj.value, rankUnit)
 
             return d3.select(this)
                     .attr('d', 'M ' + (bashX + d.x) + ',' + (bashY + d.y) + ' Q ' + res.x + ',' + res.y + ' ' + (bashX + d2.x) + ',' + (bashY + d2.y))
-                    .attr('stroke', '#000')
+                    .attr('stroke', color)
+                    .attr('stroke-width', '1')
                     .attr('fill', 'none')
-                    .attr('marker-end', 'url(#markerArrow)')
+                    .attr('marker-end', 'url(#markerArrow)');
           }
         };
-
-
-        
     };
     overlay.setMap(this.map);
       // for (let i = 0; i < lineData.length; i++) {
@@ -224,6 +293,30 @@ export default {
     });
   },
   methods: {
+    insertSort(list) {
+      let i, j, k;
+        for (i = 1; i < list.length; i++) {
+            //为a[i]在前面的a[0...i-1]有序区间中找一个合适的位置
+            for (j = i - 1; j >= 0; j--) {
+              if (list[j].value < list[i].value) {
+                break;
+              }
+            }
+
+            //如找到了一个合适的位置
+            if (j != i - 1) {
+              //将比a[i]大的数据向后移
+              let temp = list[i];
+              for (k = i - 1; k > j; k--) {
+                list[k + 1] = list[k];
+              }
+                  
+              //将a[i]放到正确位置上
+              list[k + 1] = temp;
+            }
+        }
+      return list;
+    },
     getLine(item, rankUnit) {
       let color = this.getValeColor(item.value, rankUnit);
 
@@ -267,21 +360,21 @@ export default {
       //             fillColor: color,
       //             fillOpacity: 0.8
       //            });
-
-      flightPath.value = item.value;
+      
+      flightPath.msg = item.msg;
       flightPath.id = item.id;
       
       window.google.maps.event.addDomListener(flightPath, 'click', (event) => {
         if (this.coordInfoWindow) {
           this.coordInfoWindow.close()
         }
-        let lat = event.latLng.lat();
-        let lng = event.latLng.lng();
-        this.coordInfoWindow = new google.maps.InfoWindow();
-        this.coordInfoWindow.setContent(['id:' + flightPath.id,
-                                    'value:' + flightPath.value].join('<br>'));
-        this.coordInfoWindow.setPosition(new google.maps.LatLng(lat, lng));
-        this.coordInfoWindow.open(this.map);
+        // let lat = event.latLng.lat();
+        // let lng = event.latLng.lng();
+        // this.coordInfoWindow = new google.maps.InfoWindow();
+        // this.coordInfoWindow.setContent(['id:' + flightPath.id,
+        //                             'value:' + flightPath.value].join('<br>'));
+        // this.coordInfoWindow.setPosition(new google.maps.LatLng(lat, lng));
+        // this.coordInfoWindow.open(this.map);
         this.$store.state.showConfirm = true;
         this.$store.state.confirmMes = 'Are you sure to display a two-month flow lines chart for the selected area?'
         let token = PubSub.subscribe('confirmChart', (event, data) => {
@@ -292,6 +385,7 @@ export default {
               .get('/flyIntoSky/queryflow?id=' + id)
               .then((res) => {
                 let data = res.data;
+                data.name = flightPath.msg;
                 this.$store.state.showCharts = true;
                 this.$nextTick(() => {
                   PubSub.publish('getDataCharts', data)
@@ -364,7 +458,6 @@ export default {
       // let times = Math.floor(max / num / 1.4);
 
       // let rankUnit = (1.4 * num * times) / 7;
-      console.log(rankUnit)
       return rankUnit.toFixed(1);
     }
   },
@@ -409,7 +502,7 @@ export default {
   .rank-sample {
     position: absolute;
     right: 0;
-    bottom: 2.2rem;
+    bottom: 3rem;
   }
 }
 .fly-layer {

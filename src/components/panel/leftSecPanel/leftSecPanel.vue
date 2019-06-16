@@ -178,6 +178,10 @@ export default {
         'hour': this.$data.flyDate[2]
       };
       
+      if (document.getElementsByClassName('fly-layer').length != 0) {
+        d3.selectAll('.fly-layer').remove()
+      }
+
       this.$data.isLoading = true;
       
       this.$http
@@ -360,7 +364,6 @@ export default {
           for (let i = 0; i < this.$store.state.flightPath.map1.length; i++) {
             // this.$store.state.maps.map1.remove(this.$store.state.flightPath.map1[i]);
             this.$store.state.flightPath.map1[i].setMap(null);
-            console.log('clearing')
           }
         }
       }
@@ -436,10 +439,11 @@ export default {
         returnArr.push({
           id: circles[i].id,
           value: circles[i].weight,
+          msg: circles[i].msg,
           lnglat: this.getCircleLatLng(circles[i].pointList)
         });
       }
-      console.log(returnArr)
+      // console.log(returnArr)
       return returnArr;
     },
     getDoubleData() {

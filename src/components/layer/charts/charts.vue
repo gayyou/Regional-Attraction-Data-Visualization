@@ -1,18 +1,34 @@
 <template>
-  <div class="charts-container">
+  <div class="charts-container" @click="closeTip">
     <!-- <div class="info-container">
       <span class="title">Title</span>
     </div>    -->
+    <span class="left-side-text">AttrachRank value</span>
+    <span class="bottom-text">Hour</span>
     <img class="close-chart" src="../../../assets/icons/close.png" alt=""
       @click="closeChart"
     >
     <div class="data-show" id="chart"></div>
+    <div class="tip" :style="'left: ' + x + 'px;top: ' + y + 'px;'"
+      v-if="isShow"
+    >
+      {{ name }}
+    </div>
   </div>
 </template>
 
 <script>
 import PubSub from 'pubsub-js'
+import { colors } from '../../../utils/colors.js'
 export default {
+  data() {
+    return {
+      name: '',
+      x: 0,
+      y: 0,
+      isShow: false
+    }
+  },
   mounted() {
     this.mychart = this.$echarts.init($('#chart')[0]);
     this.option = {
@@ -22,7 +38,9 @@ export default {
       },
       tooltip: {
         trigger: 'axis',
-        formatter: '{a} <br/>{b} : {c}',
+        formatter: (params) => {
+          // console.log(params)
+        },
         axisPointer: {
           type: 'cross',
           // animation: false,
@@ -47,17 +65,28 @@ export default {
       series: []
     };
     this.mychart.setOption(this.option);
+    this.mychart.on('click', (params) => {
+      console.log(params);
+      this.$nextTick(() => {
+        setTimeout(() => {
+          let name = params.seriesName;
+          this.$data.name = name;
+          this.$data.isShow = true;
+          this.$data.x = params.event.offsetX;
+          this.$data.y = params.event.offsetY;
+        }, 10);
+      })
+    });
+
 
     PubSub.subscribe('getDataCharts', (event, data) => {
-      console.log('data')
       if (data.status == 200) {
-        console.log(data)
         // this.$store.state.showCharts = true;
-        let series = this.getAllData(data.flowLines);
+        let series = this.getAllData(data.flowLines, data.name);
         this.mychart.setOption({
           series,
           title: {
-            text: 'namesss',
+            text: 'The AttrachRank value of Guangzhou ' + data.name + ' in 24 hours for two month',
             left: 'center'
           },
         })
@@ -68,6 +97,9 @@ export default {
     })
   },
   methods: {
+    closeTip() {
+      this.$data.isShow = false;
+    },
     closeChart() {
       this.$store.state.showCharts = false;
     },
@@ -83,16 +115,19 @@ export default {
     getMax(list) {
 
     },
-    getAllData(list) {
+    getAllData(list, name) {
       let seriesArr = [];
       for (let i = 0; i < list.length; i++) {
         seriesArr.push({
-          name: i,
+          name: list[i].day <= 28 ? '02-' + (list[i].day < 10 ? '0' + list[i].day : list[i].day) :('03-' + ((list[i].day - 28) < 10 ? '0' + (list[i].day - 28) : (list[i].day - 28))),
           type: 'line',
           showSymbol: false,
+          symbolSize: 9,
           hoverAnimation: false,
+          color: colors[i],
           data: this.getItemData(list[i].timeMap)
         })
+        // console.log(list[i].timeMap);
       }
       return seriesArr;
     }
@@ -108,7 +143,7 @@ export default {
 }
 .charts-container {
   width: 10rem;
-  height: 6rem;
+  height: 6.1rem;
   background-color: #fff;
   border-radius: 12px;
 
@@ -142,5 +177,28 @@ export default {
     height: 5.5rem;
     margin: .25rem auto;
   }
+}
+.tip {
+  position: absolute;
+  padding: 5px 10px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 2px 2px rgba($color: #000000, $alpha: 0.3);
+}
+.left-side-text {
+  position: absolute;
+  font-size: 18px;
+  left: -0.5rem;
+  top: 2.8rem;
+  transform:rotate(-90deg);
+}
+.bottom-text {
+  position: absolute;
+  bottom: 0.2rem;
+  width: 100%;
+  height: 0.2rem;
+  text-align: center;
+  left: 0;
+  font-size: 16px;
 }
 </style>

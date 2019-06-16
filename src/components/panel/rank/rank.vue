@@ -24,19 +24,26 @@
 
 <script>
 export default {
+  props: ['ranks'],
   data() {
     return {
       isOpen: true,
       rankList: [
-        'SHIWEITANGCUN',
-        'SANYUANLI',
-        'BAIYUNQU'
+        
       ]
     }
   },
   methods: {
     switchRank() {
       this.$data.isOpen = !this.$data.isOpen
+    }
+  },
+  watch: {
+    ranks(newVal) {
+      this.$data.rankList = [];
+      for (let i = 0; i < newVal.length; i++) {
+        this.$data.rankList.push(newVal[i]);
+      }
     }
   }
 }

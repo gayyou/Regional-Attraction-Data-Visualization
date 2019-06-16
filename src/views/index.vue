@@ -16,11 +16,16 @@
       @isOpenHeat="updateOpenHeat"
     ></leftSecPanel>
     <div class="mouse-hover-area"
-      @mousemove="openFirstPanel"
+      
     >
-      <img src="../assets/icons/arrow_left_large.png" alt="">
+      <div class="left-menu-control"
+        @mousemove="openFirstPanel"
+      >
+        <img src="../assets/icons/arrow_left_large.png" alt="">
+      </div>
     </div>
     <layer></layer>
+    <rightTip v-if="$store.state.showRightTip"></rightTip>
   </div>
 </template>
 
@@ -29,6 +34,7 @@ import layer from '../components/layer/layer.vue'
 import AMap from '../components/map/map.vue'
 import leftFirstPanel from '../components/panel/leftFirPanel/leftFirPanel.vue';
 import leftSecPanel from '../components/panel/leftSecPanel/leftSecPanel.vue';
+import rightTip from '../components/layer/rightTips/rightTips.vue'
 // import mapTip from '../components/layer/mapTip/mapTip.vue';
 
 export default {
@@ -37,7 +43,8 @@ export default {
     // mapTip,
     AMap,
     leftFirstPanel,
-    leftSecPanel
+    leftSecPanel,
+    rightTip
   },
   data() {
     return {
@@ -79,6 +86,10 @@ export default {
 </script>
 
 <style lang="scss">
+.main {
+  position: relative;
+  overflow: hidden;
+}
 .maps-bottom {
   display: flex;
   justify-content: center;
@@ -101,18 +112,29 @@ export default {
 .mouse-hover-area {
   position: absolute;
   z-index: 9;
-  width: 1.3rem;
+  width: 0.5rem;
   height: 100vh;
   top: 0;
   left: 0;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 
-  img {
-    width: 30px;
-    height: 49px;
-    margin-right: 10px;
+  .left-menu-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 0.5rem;
+    height: 2rem;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    background-color: rgba(55, 63, 83, 0.9);
+
+    img {
+      width: 30px;
+      height: 49px;
+      margin-right: 10px;
+    }
   }
 }
 </style>

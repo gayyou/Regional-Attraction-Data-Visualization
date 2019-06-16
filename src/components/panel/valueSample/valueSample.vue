@@ -1,6 +1,6 @@
 <template>
   <div class="value-sample-container">
-    <span class="sample-title">Value Rank</span>
+    <span class="sample-title">{{ rankTitle }}</span>
     <div class="sample-list"
       v-for="item in sampleList"
       :key="item.color"
@@ -14,7 +14,7 @@
 <script>
 import { colorModel } from '../../../utils/shared/model.js'
 export default {
-  props: ['rankUnit'],
+  props: ['rankUnit', 'rankTitle'],
   data() {
     return {
       sampleList: [
@@ -23,11 +23,9 @@ export default {
     }
   },
   mounted() {
-    console.log(this.rankUnit)
   },
   watch: {
     'rankUnit'(newVal) {
-      console.log(newVal)
       this.$data.sampleList = [];
       let num = 1;
       for (let item of colorModel) {
@@ -37,9 +35,6 @@ export default {
         });
         num++;
       }
-      // let last = this.$data.sampleList.pop();
-      // last.value = (newVal * (num - 2)) + '以上';
-      // this.$data.sampleList.push(last);
     }
   }
 }

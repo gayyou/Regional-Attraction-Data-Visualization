@@ -3,11 +3,11 @@
     :class="$store.state.panel.leftFirActive ? 'left-fitst-active' : ''"
     @mousemove="openPanel"
   >
-    <span @click="openSecPanel" data-mode="1">View regional heat</span>
+    <span @click="openSecPanel" data-mode="1">View AttrachRank</span>
     <span @click="openSecPanel" data-mode="2">View taxi flow</span>
     <span @click="openSecPanel" data-mode="3">{{ $store.state.isContract ? 'Close' : 'Open' }} contrast view</span>
     <span @click="clearLayer">Clear layer</span>
-    <span @click="upLoadFile">显示上传的文件<input id="upLoadFile" type="file" /></span>
+    <!-- <span @click="upLoadFile">显示上传的文件<input id="upLoadFile" type="file" /></span> -->
   </div>
 </template>
 
@@ -90,6 +90,11 @@ export default {
           });
         };
       }
+      if (document.getElementsByClassName('fly-layer').length != 0) {
+        d3.selectAll('.fly-layer').remove()
+      }
+
+      this.$store.state.rankSample['map1'].flyRankUnit = 0
       this.$store.state.rankSample['map1'].rankUnit = 0
       this.$store.state.rankSample['map2'].rankUnit = 0
     },
