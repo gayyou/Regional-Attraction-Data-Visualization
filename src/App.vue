@@ -20,10 +20,10 @@ export default {
 
 
 <style>
-@font-face {
+/* @font-face {
   font-family: 'SourceHanSansCN-Regular';
   src: url('assets/fonts/SourceHanSansCN-Regular.ttf') format('truetype');
-}
+} */
 /*
 初始化css
 */

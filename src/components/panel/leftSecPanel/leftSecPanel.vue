@@ -9,7 +9,7 @@
     <div class="attraction-container"
       v-if="$store.state.panel.secPanMode == 1 && !$store.state.isContract"
     >
-      <span class="attract-title">Regional attraction</span>
+      <span class="attract-title">District's AttractRank value</span>
       <div class="choice-mode-container">
         <span>Mode</span>
         <el-select v-model="mode" placeholder="Choice time mode">
@@ -40,7 +40,7 @@
         <el-button class="comfirm-search" type="primary"
           @click="getData"
           :loading="isLoading"
-        >Comfirm</el-button>
+        >Confirm</el-button>
       </div>
     </div>
 
@@ -48,7 +48,7 @@
     <div class="attraction-container"
       v-if="$store.state.panel.secPanMode == 1 && $store.state.isContract"
     >
-      <span class="attract-title">Regional attraction</span>
+      <span class="attract-title">District's AttractRank value</span>
       <div class="choice-mode-container">
         <span>Mode</span>
         <el-select v-model="mode" placeholder="Choice time mode">
@@ -83,7 +83,7 @@
         <el-button class="comfirm-search" type="primary"
           @click="getDoubleData"
           :loading="isLoading"
-        >Comfirm</el-button>
+        >Confirm</el-button>
       </div>
     </div>
 
@@ -91,12 +91,26 @@
     <div class="attraction-container"
       v-if="$store.state.panel.secPanMode == 2"
     >
-      <span class="attract-title">FlyLine Views</span>
-      <div class="choice-time-container">
+      <span class="attract-title">Add flying route layer</span>
+      <div class="choice-mode-container">
+        <span>Mode</span>
+        <el-select v-model="mode" placeholder="Choice time mode">
+          <el-option
+            class="select-mode"
+            v-for="item in flyTimeMode"
+            :key="item.label"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
+      <div class="choice-time-container" 
+        v-if="isShowFlyTimeChoice"
+      >
         <span>Time</span>
         <el-cascader
-          :options="flyChoice"
-          v-model="flyDate"
+          :options="dateChoice"
+          v-model="date"
         >
         </el-cascader>
       </div>
@@ -104,10 +118,9 @@
         <el-button class="comfirm-search" type="primary"
           @click="getFlyData"
           :loading="isLoading"
-        >Comfirm</el-button>
+        >Confirm</el-button>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -131,14 +144,14 @@ export default {
           label: 'By hour',
           value: 'hour'
         },
-        {
-          label: 'By date',
-          value: 'date'
-        },
-        {
-          label: 'By six hours',
-          value: 'six'
-        }
+        // {
+        //   label: 'By date',
+        //   value: 'date'
+        // },
+        // {
+        //   label: 'By six hours',
+        //   value: 'six'
+        // }
       ],
       dateChoice: [
         {
@@ -152,6 +165,23 @@ export default {
           children: null,
         }
       ],
+      // 下面是选择飞线的日期，有三个，按小时、按天、按月
+      // 分别是 hour date all
+      flylineMode: '',
+      flyTimeMode: [
+        {
+          label: 'By hour',
+          value: 'hour'
+        },
+        {
+          label: 'By day',
+          value: 'date'
+        },
+        {
+          label: 'All',
+          value: 'all'
+        }
+      ],
       flyChoice: [
         {
           value: '2',
@@ -163,20 +193,50 @@ export default {
           label: 'March',
           children: null,
         }
-      ]
+      ],
+      isShowFlyTimeChoice: true, // 是否显示飞线时间选择
     }
   },
   mounted() {
     this.$data.mode = 'hour';
-    this.renewFlyChoice()
+    this.$data.flylineMode = 'hour'
   },
   methods: {
     getFlyData() {
-      let postObj = {
-        'month': this.$data.flyDate[0],
-        'day': this.$data.flyDate[1],
-        'hour': this.$data.flyDate[2]
-      };
+      let mode = this.$data.mode,
+          isAll = false,
+          requestObj = null,
+          percent;
+
+      switch(mode) {
+        case 'hour': {
+          requestObj = {
+            month: this.$data.date[0].toString(),
+            day: this.$data.date[1].toString(),
+            hour: this.$data.date[2].toString()
+          }
+          percent = 0.3
+          break;
+        }
+
+        case 'date': {
+          requestObj = {
+            month: this.$data.date[0].toString(),
+            day: this.$data.date[1].toString(),
+            hour: '25'
+          }
+          percent = 0.45
+          break;
+        }
+
+        case 'all': {
+          isAll = true;
+          percent = 0.65
+          break;
+        }
+        
+        default: return;
+      }
       
       if (document.getElementsByClassName('fly-layer').length != 0) {
         d3.selectAll('.fly-layer').remove()
@@ -184,28 +244,50 @@ export default {
 
       this.$data.isLoading = true;
       
-      this.$http
-        .get('/flyIntoSky/update?auth=linxu')
-        .then(res => {
-          this.$http
-            .post('/flyIntoSky/route', postObj)
-            .then((res) => {
-              let data = res.data;
+      // this.$http
+      //   .get('/flyIntoSky/update?auth=linxu')
+      //   .then(res => {
+      if (isAll) {
+        this.$http
+          .get('/flyIntoSky/queryAllRoute')
+          .then((res) => {
+            let data = res.data;
 
-              this.$data.isLoading = false;
+            this.$data.isLoading = false;
 
-              let flyRes = {
-                id: 'map1',
-                data: this.fromateFlyData(data)
-              }
-              
+            let flyRes = {
+              id: 'map1',
+              data: this.fromateFlyData(data),
+              percent
+            }
+            
+            PubSub.publish('renewFlyline', flyRes);
+          })
+          .catch((err) => {
+            console.log(err);
+          })
+      } else {
+        this.$http
+          .post('/flyIntoSky/route', requestObj)
+          .then((res) => {
+            let data = res.data;
 
-              PubSub.publish('renewFlyline', flyRes);
-            })
-            .catch((err) => {
-              console.log(err);
-            })
-        })
+            this.$data.isLoading = false;
+
+            let flyRes = {
+              id: 'map1',
+              data: this.fromateFlyData(data),
+              percent
+            }
+            
+
+            PubSub.publish('renewFlyline', flyRes);
+          })
+          .catch((err) => {
+            console.log(err);
+          })
+      }
+        // })
     },
     // getDoubleFlyData() {
     //   let postObj1 = {
@@ -280,40 +362,40 @@ export default {
 
       return resultArr;
     },
-    renewFlyChoice() {
-      this.$data.flyChoice[0].children = [];
-      this.$data.flyChoice[1].children = [];
-      let children1 = [], children2 = [];
-      let timeArr = []
-      for (let i = 0; i < 24; i++) {
-        timeArr.push({
-          value: i,
-          label: i
-        })
-      }
-      for (let i = 1; i <= 28; i++) {
-        children1.push({
-          label: i,
-          value: i,
-          children: timeArr
-        });
-        children2.push({
-          label: i,
-          value: i,
-          children: timeArr
-        });
-      }
-      for (let j = 29; j <= 31; j++) {
-        children2.push({
-          label: j,
-          value: j,
-          children: timeArr
-        });
-      }
+    // renewFlyChoice() {
+    //   this.$data.flyChoice[0].children = [];
+    //   this.$data.flyChoice[1].children = [];
+    //   let children1 = [], children2 = [];
+    //   let timeArr = []
+    //   for (let i = 0; i < 24; i++) {
+    //     timeArr.push({
+    //       value: i,
+    //       label: i
+    //     })
+    //   }
+    //   for (let i = 1; i <= 28; i++) {
+    //     children1.push({
+    //       label: i,
+    //       value: i,
+    //       children: timeArr
+    //     });
+    //     children2.push({
+    //       label: i,
+    //       value: i,
+    //       children: timeArr
+    //     });
+    //   }
+    //   for (let j = 29; j <= 31; j++) {
+    //     children2.push({
+    //       label: j,
+    //       value: j,
+    //       children: timeArr
+    //     });
+    //   }
       
-      this.$data.flyChoice[0].children = children1;
-      this.$data.flyChoice[1].children = children2;
-    },
+    //   this.$data.flyChoice[0].children = children1;
+    //   this.$data.flyChoice[1].children = children2;
+    // },
     switchPanel() {
       this.$store.state.panel.leftSecActive = false;
     },
@@ -571,6 +653,11 @@ export default {
       // this.$data.firstDate = null;
       // this.$data.secondDate = null;
       switch(mode) {
+        case 'all': {
+          this.$data.isShowFlyTimeChoice = false
+          break;
+        }
+
         case 'six': {
           this.$data.dateChoice[0].children = [];
           this.$data.dateChoice[1].children = [];
@@ -601,7 +688,7 @@ export default {
               children: timeArr
             });
           }
-          
+          this.$data.isShowFlyTimeChoice = true
           this.$data.dateChoice[0].children = children1;
           this.$data.dateChoice[1].children = children2;
           break;
@@ -627,6 +714,7 @@ export default {
               value: j
             });
           }
+          this.$data.isShowFlyTimeChoice = true
           this.$data.dateChoice[0].children = children1;
           this.$data.dateChoice[1].children = children2;
           break;
@@ -663,18 +751,90 @@ export default {
             });
           }
           
+          this.$data.isShowFlyTimeChoice = true
           this.$data.dateChoice[0].children = children1;
           this.$data.dateChoice[1].children = children2;
           break;
         }
       }
     },
-    // date(date) {
-    //   console.log(date)
+    '$store.state.panel.secPanMode'(newVal) {
+      if (newVal == 1) {
+        this.$data.mode = 'hour';
+      }
+    },
+    flylineMode(mode) {
+      
+      switch(mode) {
+        case 'all': {
+          this.$data.isShowFlyTimeChoice = false
+          break;
+        }
 
-    //   this.$data.date = newDate;
-    //   console.log(newDate)
-    // }
+        case 'date': {
+          this.$data.flyChoice[0].children = [];
+          this.$data.flyChoice[1].children = [];
+          let children1 = [], children2 = [];
+          for (let i = 1; i <= 28; i++) {
+            children1.push({
+              label: i,
+              value: i
+            });
+            children2.push({
+              label: i,
+              value: i
+            });
+          }
+          for (let j = 29; j <= 31; j++) {
+            children2.push({
+              label: j,
+              value: j
+            });
+          }
+          this.$data.flyChoice[0].children = children1;
+          this.$data.flyChoice[1].children = children2;
+          this.$data.isShowFlyTimeChoice = true
+          break;
+        }
+
+        case 'hour': {
+          this.$data.flyChoice[0].children = [];
+          this.$data.flyChoice[1].children = [];
+          let children1 = [], children2 = [];
+          let timeArr = []
+          for (let i = 0; i < 24; i++) {
+            timeArr.push({
+              value: i,
+              label: i
+            })
+          }
+          for (let i = 1; i <= 28; i++) {
+            children1.push({
+              label: i,
+              value: i,
+              children: timeArr
+            });
+            children2.push({
+              label: i,
+              value: i,
+              children: timeArr
+            });
+          }
+          for (let j = 29; j <= 31; j++) {
+            children2.push({
+              label: j,
+              value: j,
+              children: timeArr
+            });
+          }
+          
+          this.$data.flyChoice[0].children = children1;
+          this.$data.flyChoice[1].children = children2;
+          this.$data.isShowFlyTimeChoice = true
+          break;
+        }
+      }
+    }
   }
 }
 </script>

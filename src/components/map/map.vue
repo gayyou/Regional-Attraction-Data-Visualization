@@ -11,9 +11,9 @@
     ></valueSample>
     <valueSample class='rank-sample' 
       :rankUnit='$data.flylineRankUnit'
-      :rankTitle='"Flyline rank"'
+      :rankTitle='"Number of records"'
       style="bottom: 0rem;"
-      v-if="$store.state.rankSample['map1'].flyRankUnit != 0"
+      v-if="$store.state.rankSample['map1'].flyRankUnit != 0 && this.id == 'map1'"
     ></valueSample>
   </div>
 </template>
@@ -33,6 +33,8 @@ export default {
   },
   data() {
     return {
+      isZooming: false,
+      timeoutID: null,
       rank: [],
       flylineRankUnit: 0,
       example: {
@@ -79,220 +81,246 @@ export default {
     //   series: []
     // });
     // let google = window.google;
-    
-    this.map = new google.maps.Map(document.getElementById(this.id), {
-      zoom: 8,
-      center: {
-        lat: 23.1,
-        lng: 113.25
-      },
-      disableDefaultUI: true,               //取消默认的试图
-      navigationControl: false,              //true表示显示控件
-      mapTypeControl: false,                //false表示不显示控件
-      scaleControl: false
-    });
-    this.$data.map = this.map;
-    this.map.addListener("mousedown", () => { 
-      this.$data.mousedown = true
-    }); 
-    this.map.addListener("mouseup", () => { 
-      this.$data.mousedown = false
-    }); 
-
-    PubSub.subscribe('renewPoly' , (event, data) => {
-      if (data.id != this.id && data.id) {
-        return ;
-      }
-      this.$store.state.showRightTip = true;
-      this.$store.state.rightTipMes = 'You can click on the color area to see the PageRank value.'
-      let arr = data.data;
-
-      let rankUnit = this.dealRankDis(arr);
-
-      arr = getGCJ(arr);
-
-      console.log(arr.length)
-      // this.insertSort(data);
-      // console.log(data)
-
-      this.$data.rank = [];
-      let length = arr.length
-      console.log(arr)
-      
-      this.$data.rank.push(arr[length - 1].msg)
-      this.$data.rank.push(arr[length - 2].msg)
-      this.$data.rank.push(arr[length - 3].msg)
-
-
-      let flightPathArr = []
-      for (let i = 0; i < arr.length; i++) {
-        let temp = this.getPolygon(arr[i], rankUnit)
-        temp.setMap(this.$data.map)
-        flightPathArr.push(temp);
-      }
-      this.$store.state.flightPath[this.id] = flightPathArr;
-      this.$store.state.maps[this.id] = this.$data.map;
-      this.$store.state.panel.leftSecActive = false;
-      this.$store.state.rankSample[this.id].rankUnit = rankUnit;
-      this.$nextTick(() => {
-        this.$data.rankUnit = rankUnit;
+    let time = 0;
+    if (!window.google) {
+      this.$store.state.showConfirm = true;
+      // this.$store.state.confirmMes = 'If you are visiting our website from China, please open the VPN first to load Google Maps. Maybe, you can click the confirmation button to jump to the Chinese network permission interface.'
+      this.$store.state.confirmMes = 'If you visit outside China, please click comfirm to jump to the special webpage outside China.';
+      PubSub.subscribe('confirmChart', (event, data) => {
+        if (data.confirm) {
+          window.location.href = 'https://qgstudio.org/cikm/attractrank/index.html'
+        } else {
+          window.location.reload();
+        }
       })
-    });
-
-    PubSub.subscribe('renewFlyline' , (event, data) => {
-      if (data.id != this.id && data.id) {
-        return ;
-      }
-
-      let flylineSeries = [],
-          lineData = data.data,
-          rankUnit = this.dealRankDis(lineData),
-          isContract = false;
-      
-      this.$store.state.rankSample['map1'].flyRankUnit = rankUnit;
-      this.$nextTick(() => {
-        this.$data.flylineRankUnit = rankUnit;
-      })
-
-      let max = this.getMaxValue(lineData);
-      let overlay = new google.maps.OverlayView();
-      // insertSort(lineData)
-      data = lineData;
-      let lens = Math.floor(data.length * 0.3);
-      data = data.slice(lens)
-
-    const that = this;
-    overlay.onAdd = function() {
-      // console.log(this.getPanes().overlayLayer)
-        var layer = d3.select(this.getPanes().overlayLayer).append('svg')
-            .attr('class', 'fly-layer');
-
-        let defs = layer.append('defs');
-        defs.append('marker')
-          .attr('id', 'markerArrow')
-          .attr('markerWidth', '13')
-          .attr('markerHeight', '13')
-          .attr('refX', '2')
-          .attr('refY', '6')
-          .attr('orient', 'auto')
-          .append('path')
-          .attr('d', 'M2,2 L2,11 L10,6 L2,2')
-          .attr('fill', '#FF0000');
-
-        // console.log('data', data)
-
-        layer.selectAll('.flyLine').data(data, (d) => d.id).enter().append('path').attr('class', 'flyLines')
-        var projection = this.getProjection();
-        overlay.draw = function() {
-          if (that.$data.mousedown) {
-            return ;
-          }
-          let isContract = false;
-          let randomBash = 0;
-          let bounds = this.map.getBounds();
-          let nw = bounds.getNorthEast(),
-              sw = bounds.getSouthWest(),
-              center = bounds.getCenter();
-          
-          layer.selectAll('.flyLines')
-            .data(data)
-            .each(transform)
-
-          function getCosFromTan(d1, d2, isContract) {
-            let value, rad;
-            if (d2.x == d1.x) {
-              value = 0;
-              rad = Math.PI / 2;
-            } else {
-              value = (d2.y - d1.y) / (d2.x - d1.x),
-              rad = Math.atan(Math.abs(value));
-            }
-            
-            let length = Math.pow(Math.pow(d2.y - d1.y, 2) + Math.pow(d2.x - d1.x, 2), 1 / 2),
-                paramX, paramY;
-
-            if (value < 0) {
-              paramX = 1;
-              paramY = 1;
-            } else {
-              paramX = 1;
-              paramY = -1;
-            }
-
-            return isContract ? {
-              x: paramX * length * Math.sin(rad),
-              y: paramY * length * Math.cos(rad)
-            } : {
-              x: -(paramX * length * Math.sin(rad)),
-              y: -(paramY * length * Math.cos(rad))
-            }
-          }
-
-          function transform(flyObj) {
-            let d = new google.maps.LatLng(flyObj.fromLnglat[1], flyObj.fromLnglat[0]);
-            let d2 = new google.maps.LatLng(flyObj.toLnglat[1], flyObj.toLnglat[0]);
-            let bash = new google.maps.LatLng(nw.lat(), nw.lng())
-            let bash2 = new google.maps.LatLng(sw.lat(), sw.lng())
-            d = projection.fromLatLngToDivPixel(d);
-            d2 = projection.fromLatLngToDivPixel(d2);
-            let bashX = projection.fromLatLngToDivPixel(bash).x;
-            let bashY = projection.fromLatLngToDivPixel(bash2).y
-            let res = getCosFromTan(d, d2, isContract);
-
-            if (isContract == true) {
-              isContract = false;
-            } else {
-              isContract = true;
-            }
-            randomBash =  (randomBash + 1) % 10;
-            res.x = bashX + res.x * (randomBash / 10) + (d2.x + d.x) / 2;
-            res.y = bashY + res.y * (randomBash / 10) + (d2.y + d.y) / 2;
-            let color = that.getValeColor(flyObj.value, rankUnit)
-
-            return d3.select(this)
-                    .attr('d', 'M ' + (bashX + d.x) + ',' + (bashY + d.y) + ' Q ' + res.x + ',' + res.y + ' ' + (bashX + d2.x) + ',' + (bashY + d2.y))
-                    .attr('stroke', color)
-                    .attr('stroke-width', '1')
-                    .attr('fill', 'none')
-                    .attr('marker-end', 'url(#markerArrow)');
-          }
-        };
-    };
-    overlay.setMap(this.map);
-      // for (let i = 0; i < lineData.length; i++) {
-      //   flylineSeries = [...flylineSeries, ...this.getLine(lineData[i], rankUnit)];
-      // }
-
-      // let dataRange = {
-      //   zIndex: 2,
-      //   min: 0,
-      //   max: max,
-      //   x: 'right',
-      //   y: 'bottom',
-      //   calculable: true,
-      //   color: ['#3794C4', '#65ABBC', '#A1CDB2', '#DDE9A4', '#EFBC7A', '#F05435', '#EE2123'],
-      //   textStyle: {
-      //     color: '#000'
-      //   },
-      //   text:[0, max],
-      // }
-      // this.mychart.setOption({
-      //   series: flylineSeries,
-      //   dataRange
-      // })
-      // this.layer.render = () => {
-      //   this.mychart.setOption({
-      //     series: flylineSeries,
-      //     dataRange
-      //   });
-      // };
-      // this.$store.state.flightPath[this.id] = flightPathArr;
-      // this.$store.state.maps[this.id] = this.$data.map;
-      // this.$store.state.panel.leftSecActive = false;
-      // this.$data.rankUnit = rankUnit;
-    });
+    } else {
+      this.initPage()
+    }
   },
   methods: {
+    initPage() {
+      this.map = new google.maps.Map(document.getElementById(this.id), {
+        zoom: 11,
+        center: {
+          lat: 23.12,
+          lng: 113.28
+        },
+        disableDefaultUI: true,               //取消默认的试图
+        navigationControl: false,              //true表示显示控件
+        mapTypeControl: false,                //false表示不显示控件
+        scaleControl: false
+      });
+      this.$data.map = this.map;
+      this.map.addListener("dragstart", () => { 
+        this.$data.mousedown = true
+      }); 
+      this.map.addListener("dragend", () => { 
+        this.$data.mousedown = false
+      });
+      this.map.addListener('zoom_changed', () => {
+        if (this.$data.timeoutID) {
+          clearTimeout(this.$data.timeoutID);
+        }
+        this.$data.isZooming = true;
+        this.$data.timeoutID = setTimeout(() => {
+          this.$data.isZooming = false;
+        }, 100);
+      })
+
+      PubSub.subscribe('renewPoly' , (event, data) => {
+        if (data.id != this.id && data.id) {
+          return ;
+        }
+        this.$store.state.showRightTip = true;
+        this.$store.state.rightTipMes = 'You can click on the colored area to see the AttractRank value.'
+        let arr = data.data;
+
+        let rankUnit = this.dealRankDis(arr);
+
+        arr = getGCJ(arr);
+
+
+        // this.insertSort(data);
+        // console.log(data)
+
+        this.$data.rank = [];
+        let length = arr.length
+        
+        this.$data.rank.push(arr[length - 1].msg)
+        this.$data.rank.push(arr[length - 2].msg)
+        this.$data.rank.push(arr[length - 3].msg)
+
+
+        let flightPathArr = []
+        for (let i = 0; i < arr.length; i++) {
+          let temp = this.getPolygon(arr[i], rankUnit)
+          temp.setMap(this.$data.map)
+          flightPathArr.push(temp);
+        }
+        this.$store.state.flightPath[this.id] = flightPathArr;
+        this.$store.state.maps[this.id] = this.$data.map;
+        this.$store.state.panel.leftSecActive = false;
+        this.$store.state.rankSample[this.id].rankUnit = rankUnit;
+        this.$nextTick(() => {
+          this.$data.rankUnit = rankUnit;
+        })
+      });
+
+      PubSub.subscribe('renewFlyline' , (event, data) => {
+        if (data.id != this.id && data.id) {
+          return ;
+        }
+
+        let flylineSeries = [],
+            lineData = data.data,
+            percent = data.percent,
+            rankUnit = this.dealRankDis(lineData),
+            isContract = false;
+        
+        this.$store.state.rankSample['map1'].flyRankUnit = rankUnit;
+        this.$nextTick(() => {
+          this.$data.flylineRankUnit = rankUnit;
+        })
+
+        let max = this.getMaxValue(lineData);
+        let overlay = new google.maps.OverlayView();
+        // insertSort(lineData)
+        data = lineData;
+        let lens = Math.floor(data.length * percent);
+        data = data.slice(lens)
+
+      const that = this;
+      overlay.onAdd = function() {
+        // console.log(this.getPanes().overlayLayer)
+          var layer = d3.select(this.getPanes().overlayLayer).append('svg')
+              .attr('class', 'fly-layer');
+
+          let defs = layer.append('defs');
+          defs.append('marker')
+            .attr('id', 'markerArrow')
+            .attr('markerWidth', '13')
+            .attr('markerHeight', '13')
+            .attr('refX', '2')
+            .attr('refY', '6')
+            .attr('orient', 'auto')
+            .append('path')
+            .attr('d', 'M2,2 L2,11 L10,6 L2,2')
+            .attr('fill', '#FF0000');
+
+          // console.log('data', data)
+
+          layer.selectAll('.flyLine').data(data, (d) => d.id).enter().append('path').attr('class', 'flyLines')
+          var projection = this.getProjection();
+          overlay.draw = function() {
+            if (that.$data.mousedown) {
+              return ;
+            }
+            // if (that.$data.is)
+            let isContract = false;
+            let randomBash = 0;
+            let bounds = this.map.getBounds();
+            let nw = bounds.getNorthEast(),
+                sw = bounds.getSouthWest(),
+                center = bounds.getCenter();
+            
+            layer.selectAll('.flyLines')
+              .data(data)
+              .each(transform)
+
+            function getCosFromTan(d1, d2, isContract) {
+              let value, rad;
+              if (d2.x == d1.x) {
+                value = 0;
+                rad = Math.PI / 2;
+              } else {
+                value = (d2.y - d1.y) / (d2.x - d1.x),
+                rad = Math.atan(Math.abs(value));
+              }
+              
+              let length = Math.pow(Math.pow(d2.y - d1.y, 2) + Math.pow(d2.x - d1.x, 2), 1 / 2),
+                  paramX, paramY;
+
+              if (value < 0) {
+                paramX = 1;
+                paramY = 1;
+              } else {
+                paramX = 1;
+                paramY = -1;
+              }
+
+              return isContract ? {
+                x: paramX * length * Math.sin(rad),
+                y: paramY * length * Math.cos(rad)
+              } : {
+                x: -(paramX * length * Math.sin(rad)),
+                y: -(paramY * length * Math.cos(rad))
+              }
+            }
+
+            function transform(flyObj) {
+              let d = new google.maps.LatLng(flyObj.fromLnglat[1], flyObj.fromLnglat[0]);
+              let d2 = new google.maps.LatLng(flyObj.toLnglat[1], flyObj.toLnglat[0]);
+              let bash = new google.maps.LatLng(nw.lat(), nw.lng())
+              let bash2 = new google.maps.LatLng(sw.lat(), sw.lng())
+              d = projection.fromLatLngToDivPixel(d);
+              d2 = projection.fromLatLngToDivPixel(d2);
+              let bashX = projection.fromLatLngToDivPixel(bash).x;
+              let bashY = projection.fromLatLngToDivPixel(bash2).y
+              let res = getCosFromTan(d, d2, isContract);
+
+              if (isContract == true) {
+                isContract = false;
+              } else {
+                isContract = true;
+              }
+              randomBash =  (randomBash + 1) % 10;
+              res.x = bashX + res.x * (randomBash / 10) + (d2.x + d.x) / 2;
+              res.y = bashY + res.y * (randomBash / 10) + (d2.y + d.y) / 2;
+              let color = that.getValeColor(flyObj.value, rankUnit)
+
+              return d3.select(this)
+                      .attr('d', 'M ' + (bashX + d.x) + ',' + (bashY + d.y) + ' Q ' + res.x + ',' + res.y + ' ' + (bashX + d2.x) + ',' + (bashY + d2.y))
+                      .attr('stroke', color)
+                      .attr('stroke-width', '1')
+                      .attr('fill', 'none')
+                      .attr('marker-end', 'url(#markerArrow)');
+            }
+          };
+      };
+      overlay.setMap(this.map);
+        // for (let i = 0; i < lineData.length; i++) {
+        //   flylineSeries = [...flylineSeries, ...this.getLine(lineData[i], rankUnit)];
+        // }
+
+        // let dataRange = {
+        //   zIndex: 2,
+        //   min: 0,
+        //   max: max,
+        //   x: 'right',
+        //   y: 'bottom',
+        //   calculable: true,
+        //   color: ['#3794C4', '#65ABBC', '#A1CDB2', '#DDE9A4', '#EFBC7A', '#F05435', '#EE2123'],
+        //   textStyle: {
+        //     color: '#000'
+        //   },
+        //   text:[0, max],
+        // }
+        // this.mychart.setOption({
+        //   series: flylineSeries,
+        //   dataRange
+        // })
+        // this.layer.render = () => {
+        //   this.mychart.setOption({
+        //     series: flylineSeries,
+        //     dataRange
+        //   });
+        // };
+        // this.$store.state.flightPath[this.id] = flightPathArr;
+        // this.$store.state.maps[this.id] = this.$data.map;
+        // this.$store.state.panel.leftSecActive = false;
+        // this.$data.rankUnit = rankUnit;
+      });
+    },
     insertSort(list) {
       let i, j, k;
         for (i = 1; i < list.length; i++) {
@@ -376,7 +404,7 @@ export default {
         // this.coordInfoWindow.setPosition(new google.maps.LatLng(lat, lng));
         // this.coordInfoWindow.open(this.map);
         this.$store.state.showConfirm = true;
-        this.$store.state.confirmMes = 'Are you sure to display a two-month flow lines chart for the selected area?'
+        this.$store.state.confirmMes = 'Are you sure you want to display how the AttractRank values of selected district change over hours in a day?'
         let token = PubSub.subscribe('confirmChart', (event, data) => {
           PubSub.unsubscribe(token);
           if (data.confirm) {
@@ -419,7 +447,7 @@ export default {
       value = parseFloat(value);
       let level = Math.floor(value / rankUnit);
 
-      return level < 6 ? colorModel[level] : colorModel[6];
+      return level < (colorModel.length - 1) ? colorModel[level] : colorModel[colorModel.length - 1];
     },
     getLevel(max) {
       let digit = 0;
@@ -446,7 +474,7 @@ export default {
     dealRankDis(list) {
       let max = this.getMaxValue(list);
 
-      let rankUnit = max / 7;
+      let rankUnit = max / colorModel.length;
       // let max = this.getMaxValue(list),
       //   level = this.getLevel(max),
       //   num = 1;
@@ -502,7 +530,7 @@ export default {
   .rank-sample {
     position: absolute;
     right: 0;
-    bottom: 3rem;
+    bottom: 3.3rem;
   }
 }
 .fly-layer {

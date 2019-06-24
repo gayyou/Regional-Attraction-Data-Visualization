@@ -17,10 +17,10 @@ axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 
 if (process.env.NODE_ENV === 'development') {
   // 测试环境
-  axios.defaults.baseURL = 'http://39.98.41.126:11290';
+  axios.defaults.baseURL = 'https://qgstudio.org:11290';
 } else {
   // 生产环境
-  axios.defaults.baseURL = 'http://39.98.41.126:11290';
+  axios.defaults.baseURL = 'https://qgstudio.org:11290';
 }
 
 Vue.prototype.$echarts = echarts;

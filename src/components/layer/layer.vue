@@ -1,17 +1,20 @@
 <template>
   <div class="float-layer" 
-    :class="($store.state.showConfirm || $store.state.showMessage || $store.state.showCharts) ? 'layer-active' : 'layer-normal'"
+    :class="($store.state.showConfirm || $store.state.showMessage || $store.state.showCharts || $store.state.showVideo) ? 'layer-active' : 'layer-normal'"
   >
     <confirm-layer v-if="$store.state.showConfirm"></confirm-layer>
     <message v-if="$store.state.showMessage" ></message>
     <charts class="chart-posi" v-if="$store.state.showCharts"></charts>
+    <demoVideo v-if="$store.state.showVideo"></demoVideo>
   </div>  
 </template>
 
 <script>
 import confirmLayer from "./confirm/confirm.vue";
 import message from './message/message.vue';
-import charts from './charts/charts.vue'
+import charts from './charts/charts.vue';
+import demoVideo from './video/video.vue';
+
 export default {
   data() {
     return {
@@ -21,7 +24,8 @@ export default {
   components: {
     'confirm-layer': confirmLayer,
     message,
-    charts
+    charts,
+    demoVideo
   }
 }
 </script>

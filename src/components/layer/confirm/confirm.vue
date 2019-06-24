@@ -7,8 +7,8 @@
       <span>{{ $store.state.confirmMes }}</span>
     </div>
     <div class="prompt-choice">
-      <button class="prompt-cancel" @click="cancelOperate">cancle</button>
-      <button class="prompt-confirm" @click="confirmOperate">comfirm</button>
+      <button class="prompt-cancel" @click="cancelOperate">No</button>
+      <button class="prompt-confirm" @click="confirmOperate">Yes</button>
     </div>
   </div>
 </template>
@@ -55,17 +55,24 @@ $prompt-prefix: "prompt";
   justify-content: center;
   align-items: center;
 }
+%clear-both::after {
+  content: "";
+  clear: both;
+  display: block;
+}
 
 $themeColor: #0060e6;
 
 .#{ $prompt-prefix } {
   &-container {
+    @extend %clear-both;
+
     position: absolute;
     top: 0;
     left: 50%;
     transform: translateX(-50%) translateY(-100%);
     width: 7rem;
-    height: 2.6rem;
+    min-height: 2.6rem;
     border-radius: 0.12rem;
     background-color: #fff;
     transition: top .75s ease-out;
@@ -86,18 +93,27 @@ $themeColor: #0060e6;
       color: $themeColor;
       letter-spacing: 0.04rem;
     }
+
+    
   }
 
   &-value {
     @extend %flex-center;
-
+    @extend %clear-both;
     width: 100%;
-    height: 1rem;
+    min-height: 1rem;
 
     >span {
       font-size: 20px;
       width: 80%;
-      height: 100%;
+      min-height: 100%;
+      // min-height: 0.45rem;
+    }
+
+    >span::after {
+      content: "";
+      display: block;
+      clear: both;
     }
   }
   
@@ -105,11 +121,13 @@ $themeColor: #0060e6;
     @extend %flex-center;
 
     width: 100%;
+    margin-top: 0.1rem;
+    margin-bottom: 0.1rem;
 
     button {
       width: 1.5rem;
-      height: 0.45rem;
-      margin: 5px 10px;
+      min-height: 0.45rem;
+      margin: 5px 0.2rem;
       border-radius: 0.36rem;
     }
   }
@@ -135,7 +153,7 @@ $themeColor: #0060e6;
   }
 
   &-active {
-    top: 35%!important;
+    top: 40%!important;
   }
 }
 

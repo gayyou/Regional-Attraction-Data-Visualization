@@ -15,6 +15,7 @@ export default new Vuex.Store({
     showRightTip: false,
     showConfirm: false,
     showCharts: false,
+    showVideo: false,
     // 下面是左边侧栏的显示与否控制
     panel: {
       leftFirActive: false,

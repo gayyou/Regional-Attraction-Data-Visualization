@@ -8,7 +8,7 @@
         :src="isOpen ? require('../../../assets/icons/arrow_right_large.png') : require('../../../assets/icons/arrow_left_large.png')" alt="">
     </div>
     <div class="rank-main">
-      <span class="rank-title">Attraction ranking</span>
+      <span class="rank-title">AttractRank ranking</span>
       <div class="rank-container">
         <div class="rank-list"
           v-for="(item, index) in rankList"

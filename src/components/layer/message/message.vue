@@ -119,7 +119,7 @@ $themeColor: #0060e6;
   }
 
   &-active {
-    top: 35%!important;
+    top: 40%!important;
   }
 }
 

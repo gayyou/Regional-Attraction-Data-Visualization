@@ -3,7 +3,7 @@
     <!-- <div class="info-container">
       <span class="title">Title</span>
     </div>    -->
-    <span class="left-side-text">AttrachRank value</span>
+    <span class="left-side-text">AttractRank value</span>
     <span class="bottom-text">Hour</span>
     <img class="close-chart" src="../../../assets/icons/close.png" alt=""
       @click="closeChart"
@@ -86,7 +86,7 @@ export default {
         this.mychart.setOption({
           series,
           title: {
-            text: 'The AttrachRank value of Guangzhou ' + data.name + ' in 24 hours for two month',
+            text: 'The AttractRank value of Guangzhou ' + data.name + ' in 24 hours for two month',
             left: 'center'
           },
         })
@@ -200,5 +200,8 @@ export default {
   text-align: center;
   left: 0;
   font-size: 16px;
+}
+span {
+  font-weight: 800;
 }
 </style>

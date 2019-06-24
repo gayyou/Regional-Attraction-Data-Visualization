@@ -1,5 +1,6 @@
 // 该文件存放所有的model对象
 export const colorModel = [
+  // '#025FE2',
   '#3794C4',
   '#65ABBC',
   '#A1CDB2',

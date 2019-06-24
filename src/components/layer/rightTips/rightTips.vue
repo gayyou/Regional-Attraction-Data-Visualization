@@ -45,7 +45,7 @@ export default {
         setTimeout(() => {
           this.$store.state.showRightTip = false;
         }, 751);
-      }, 3500);
+      }, 4500);
     }, 10);
   }
 }

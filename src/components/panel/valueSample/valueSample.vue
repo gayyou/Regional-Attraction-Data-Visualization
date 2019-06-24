@@ -31,6 +31,7 @@ export default {
       for (let item of colorModel) {
         this.$data.sampleList.push({
           value: (newVal * (num - 1)).toFixed(1) + '-' + (newVal * num).toFixed(1),
+          // value: 'Group ' + (num * newVal),
           color: item
         });
         num++;
